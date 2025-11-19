@@ -101,25 +101,75 @@ class Houzez_Netopia {
 	 */
 	public function enqueue_public_assets() {
 		// Only load on payment pages
-		if ( ! is_page_template( 'template-payment.php' ) && ! isset( $_GET['selected_package'] ) && ! isset( $_GET['prop-id'] ) ) {
+		$is_payment_page = false;
+		
+		// Check if it's a payment template
+		if ( is_page_template( 'template-payment.php' ) ) {
+			$is_payment_page = true;
+		}
+		
+		// Check for package selection
+		if ( isset( $_GET['selected_package'] ) ) {
+			$is_payment_page = true;
+		}
+		
+		// Check for property ID (listing payment)
+		if ( isset( $_GET['prop-id'] ) || isset( $_GET['upgrade_id'] ) ) {
+			$is_payment_page = true;
+		}
+		
+		// Check if current page slug contains 'complete-order' or 'payment'
+		global $wp;
+		$current_url = home_url( add_query_arg( array(), $wp->request ) );
+		if ( strpos( $current_url, 'complete-order' ) !== false || strpos( $current_url, 'payment' ) !== false ) {
+			$is_payment_page = true;
+		}
+		
+		// Also check REQUEST_URI directly
+		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+			$request_uri = $_SERVER['REQUEST_URI'];
+			if ( strpos( $request_uri, 'complete-order' ) !== false || strpos( $request_uri, 'payment' ) !== false ) {
+				$is_payment_page = true;
+			}
+		}
+		
+		if ( ! $is_payment_page ) {
 			return;
 		}
 
-		wp_enqueue_style(
-			$this->plugin_name . '-frontend',
-			HOUZEZ_NETOPIA_PLUGIN_URL . 'assets/css/frontend.css',
-			array(),
-			$this->version,
-			'all'
-		);
+		// Verify files exist before enqueuing
+		$css_path = HOUZEZ_NETOPIA_PLUGIN_DIR . 'assets/css/frontend.css';
+		$js_path = HOUZEZ_NETOPIA_PLUGIN_DIR . 'assets/js/frontend.js';
+		
+		if ( file_exists( $css_path ) ) {
+			wp_enqueue_style(
+				$this->plugin_name . '-frontend',
+				HOUZEZ_NETOPIA_PLUGIN_URL . 'assets/css/frontend.css',
+				array(),
+				$this->version,
+				'all'
+			);
+		}
 
-		wp_enqueue_script(
-			$this->plugin_name . '-frontend',
-			HOUZEZ_NETOPIA_PLUGIN_URL . 'assets/js/frontend.js',
-			array( 'jquery' ),
-			$this->version,
-			true // Load in footer to ensure it runs after theme's scripts
-		);
+		if ( file_exists( $js_path ) ) {
+			wp_enqueue_script(
+				$this->plugin_name . '-frontend',
+				HOUZEZ_NETOPIA_PLUGIN_URL . 'assets/js/frontend.js',
+				array( 'jquery' ),
+				$this->version,
+				true // Load in footer to ensure it runs after theme's scripts
+			);
+
+			wp_localize_script(
+				$this->plugin_name . '-frontend',
+				'houzez_netopia',
+				array(
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'nonce' => wp_create_nonce( 'houzez_register_nonce2' ),
+					'success_url' => home_url( '/?netopia_payment=success' ),
+				)
+			);
+		}
 
 		wp_localize_script(
 			$this->plugin_name . '-frontend',
@@ -170,7 +220,27 @@ class Houzez_Netopia {
 	 */
 	public function add_netopia_to_listing_form() {
 		// Only on payment page and if per listing is enabled
-		if ( ! is_page_template( 'template-payment.php' ) && ! isset( $_GET['prop-id'] ) && ! isset( $_GET['upgrade_id'] ) ) {
+		$is_listing_payment_page = false;
+		
+		// Check if it's a payment template
+		if ( is_page_template( 'template-payment.php' ) ) {
+			$is_listing_payment_page = true;
+		}
+		
+		// Check for property ID or upgrade ID
+		if ( isset( $_GET['prop-id'] ) || isset( $_GET['upgrade_id'] ) ) {
+			$is_listing_payment_page = true;
+		}
+		
+		// Check if current URL contains 'complete-order'
+		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+			$request_uri = $_SERVER['REQUEST_URI'];
+			if ( strpos( $request_uri, 'complete-order' ) !== false ) {
+				$is_listing_payment_page = true;
+			}
+		}
+		
+		if ( ! $is_listing_payment_page ) {
 			return;
 		}
 
