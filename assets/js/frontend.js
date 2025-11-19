@@ -34,25 +34,48 @@
 				}
 			});
 
-			// Handle membership payment
+			// Handle membership payment using event delegation with capture phase
+			// This ensures our handler runs before theme's handler
 			$(document).on('click', '#houzez_complete_membership', function(e) {
-				e.preventDefault();
 				var paymentType = $('input[name="houzez_payment_type"]:checked').val();
 				
 				if (paymentType === 'netopia') {
+					e.preventDefault();
+					e.stopImmediatePropagation();
 					HouzezNetopia.processMembershipPayment();
+					return false;
 				}
 			});
 
-			// Handle listing payment
-			$(document).on('click', '#houzez_complete_order', function(e) {
-				e.preventDefault();
-				var paymentType = $('input[name="houzez_payment_type"]:checked').val();
-				
-				if (paymentType === 'netopia') {
-					HouzezNetopia.processListingPayment();
+			// Handle listing payment - intercept click before theme's handler processes it
+			// Use native addEventListener with capture:true to intercept in capture phase
+			var attachOrderHandler = function() {
+				var orderBtn = document.getElementById('houzez_complete_order');
+				if (orderBtn) {
+					// Remove any existing Netopia handlers
+					orderBtn.removeEventListener('click', HouzezNetopia.handleOrderClick, true);
+					
+					// Add our handler in capture phase (runs before bubble phase handlers)
+					orderBtn.addEventListener('click', HouzezNetopia.handleOrderClick, true);
+					return true;
 				}
-			});
+				return false;
+			};
+			
+			// Try to attach immediately
+			if (!attachOrderHandler()) {
+				// If button doesn't exist yet, wait for it and try again
+				var checkInterval = setInterval(function() {
+					if (attachOrderHandler()) {
+						clearInterval(checkInterval);
+					}
+				}, 100);
+				
+				// Stop checking after 5 seconds
+				setTimeout(function() {
+					clearInterval(checkInterval);
+				}, 5000);
+			}
 
 			// Format card number input
 			$(document).on('input', '#netopia_card_number, #netopia_card_number_listing', function() {
@@ -60,6 +83,20 @@
 				var formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
 				$(this).val(formattedValue);
 			});
+		},
+
+		/**
+		 * Handle order button click (for listing payments).
+		 */
+		handleOrderClick: function(e) {
+			var paymentType = $('input[name="houzez_payment_type"]:checked').val();
+			
+			if (paymentType === 'netopia') {
+				e.preventDefault();
+				e.stopImmediatePropagation();
+				HouzezNetopia.processListingPayment();
+				return false;
+			}
 		},
 
 		/**

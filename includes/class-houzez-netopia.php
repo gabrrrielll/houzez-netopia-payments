@@ -118,7 +118,7 @@ class Houzez_Netopia {
 			HOUZEZ_NETOPIA_PLUGIN_URL . 'assets/js/frontend.js',
 			array( 'jquery' ),
 			$this->version,
-			false
+			true // Load in footer to ensure it runs after theme's scripts
 		);
 
 		wp_localize_script(
