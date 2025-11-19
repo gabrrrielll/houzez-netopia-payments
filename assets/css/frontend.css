@@ -1,0 +1,46 @@
+/**
+ * Frontend styles for Netopia Payments.
+ *
+ * @package    Houzez_Netopia
+ * @subpackage Houzez_Netopia/assets/css
+ */
+
+.netopia-card-form {
+	margin-top: 20px;
+	padding: 20px;
+	background: #f9f9f9;
+	border-radius: 4px;
+	border: 1px solid #ddd;
+}
+
+.netopia-card-form .form-group {
+	margin-bottom: 15px;
+}
+
+.netopia-card-form label {
+	font-weight: 600;
+	margin-bottom: 5px;
+	display: block;
+}
+
+.netopia-card-form .form-control {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.netopia-card-form .form-control:focus {
+	border-color: #0073aa;
+	outline: none;
+	box-shadow: 0 0 0 1px #0073aa;
+}
+
+.netopia-method {
+	margin-bottom: 15px;
+}
+
+.netopia-method img {
+	max-height: 30px;
+}
+

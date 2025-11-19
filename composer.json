@@ -1,0 +1,16 @@
+{
+	"name": "houzez/netopia-payments",
+	"description": "Netopia Payments gateway integration for Houzez theme",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=7.4",
+		"netopia/payment2": "^1.0.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"HouzezNetopia\\": "includes/"
+		}
+	}
+}
+

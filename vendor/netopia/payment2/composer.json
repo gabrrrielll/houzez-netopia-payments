@@ -1,0 +1,23 @@
+{
+    "name": "netopia/payment2",
+    "description": "The Payments API was designed and implemented by NETOPIA Payments development team and is meant to be used in third party applications to cover the payment process.",
+    "type": "library",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "NETOPIA Payments",
+            "email": "implementare@netopia-system.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.4",
+        "ext-dom": "*",
+        "firebase/php-jwt": "^6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Netopia\\Payment2\\": "src/"
+        }
+    }
+}
