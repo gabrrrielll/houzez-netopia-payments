@@ -61,7 +61,7 @@ $enable_wireTransfer = function_exists( 'houzez_option' ) ? houzez_option( 'enab
 				<div class="form-group">
 					<label for="netopia_exp_month"><?php esc_html_e( 'Exp Month', 'houzez-netopia' ); ?></label>
 					<select id="netopia_exp_month" name="netopia_exp_month" class="form-control" required>
-						<option value=""><?php esc_html_e( 'Month', 'houzez-netopia' ); ?></option>
+						<option value="" disabled selected><?php esc_html_e( 'Select Month', 'houzez-netopia' ); ?></option>
 						<?php for ( $i = 1; $i <= 12; $i++ ) : ?>
 							<option value="<?php echo esc_attr( sprintf( '%02d', $i ) ); ?>"><?php echo esc_html( sprintf( '%02d', $i ) ); ?></option>
 						<?php endfor; ?>
@@ -72,7 +72,7 @@ $enable_wireTransfer = function_exists( 'houzez_option' ) ? houzez_option( 'enab
 				<div class="form-group">
 					<label for="netopia_exp_year"><?php esc_html_e( 'Exp Year', 'houzez-netopia' ); ?></label>
 					<select id="netopia_exp_year" name="netopia_exp_year" class="form-control" required>
-						<option value=""><?php esc_html_e( 'Year', 'houzez-netopia' ); ?></option>
+						<option value="" disabled selected><?php esc_html_e( 'Select Year', 'houzez-netopia' ); ?></option>
 						<?php
 						$current_year = intval( date( 'Y' ) );
 						for ( $i = $current_year; $i <= $current_year + 10; $i++ ) :

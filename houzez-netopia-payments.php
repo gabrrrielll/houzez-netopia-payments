@@ -95,7 +95,7 @@ function houzez_netopia_inline_frontend_js()
     if (file_exists($js_path)) {
         // Asigurăm că jQuery este încărcat
         wp_enqueue_script('jquery');
-        
+
         // Adăugăm variabilele localizate înainte de script
         echo '<script type="text/javascript">' . "\n";
         echo 'var houzez_netopia = ' . json_encode(array(
@@ -104,7 +104,7 @@ function houzez_netopia_inline_frontend_js()
             'success_url' => home_url('/?netopia_payment=success'),
         )) . ';' . "\n";
         echo '</script>' . "\n";
-        
+
         // Adăugăm scriptul principal
         echo '<script type="text/javascript">' . "\n";
         echo file_get_contents($js_path);
