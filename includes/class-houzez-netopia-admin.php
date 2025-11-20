@@ -82,7 +82,8 @@ class Houzez_Netopia_Admin {
 	public function register_settings() {
 		register_setting( 'houzez_netopia_settings', 'houzez_netopia_enabled' );
 		register_setting( 'houzez_netopia_settings', 'houzez_netopia_sandbox' );
-		register_setting( 'houzez_netopia_settings', 'houzez_netopia_api_key' );
+		register_setting( 'houzez_netopia_settings', 'houzez_netopia_api_key_sandbox' );
+		register_setting( 'houzez_netopia_settings', 'houzez_netopia_api_key_live' );
 		register_setting( 'houzez_netopia_settings', 'houzez_netopia_signature' );
 		register_setting( 'houzez_netopia_settings', 'houzez_netopia_currency' );
 	}
@@ -99,7 +100,8 @@ class Houzez_Netopia_Admin {
 		if ( isset( $_POST['houzez_netopia_save_settings'] ) && check_admin_referer( 'houzez_netopia_settings' ) ) {
 			update_option( 'houzez_netopia_enabled', isset( $_POST['houzez_netopia_enabled'] ) ? '1' : '0' );
 			update_option( 'houzez_netopia_sandbox', isset( $_POST['houzez_netopia_sandbox'] ) ? '1' : '0' );
-			update_option( 'houzez_netopia_api_key', sanitize_text_field( $_POST['houzez_netopia_api_key'] ) );
+			update_option( 'houzez_netopia_api_key_sandbox', sanitize_text_field( $_POST['houzez_netopia_api_key_sandbox'] ) );
+			update_option( 'houzez_netopia_api_key_live', sanitize_text_field( $_POST['houzez_netopia_api_key_live'] ) );
 			update_option( 'houzez_netopia_signature', sanitize_text_field( $_POST['houzez_netopia_signature'] ) );
 			update_option( 'houzez_netopia_currency', sanitize_text_field( $_POST['houzez_netopia_currency'] ) );
 
@@ -109,9 +111,20 @@ class Houzez_Netopia_Admin {
 		// Get current settings
 		$enabled = get_option( 'houzez_netopia_enabled', '0' );
 		$sandbox = get_option( 'houzez_netopia_sandbox', '1' );
-		$api_key = get_option( 'houzez_netopia_api_key', '' );
+		$api_key_sandbox = get_option( 'houzez_netopia_api_key_sandbox', '' );
+		$api_key_live = get_option( 'houzez_netopia_api_key_live', '' );
 		$signature = get_option( 'houzez_netopia_signature', '' );
 		$currency = get_option( 'houzez_netopia_currency', 'RON' );
+		
+		// Migration: If old api_key exists and new ones don't, migrate it
+		$old_api_key = get_option( 'houzez_netopia_api_key', '' );
+		if ( ! empty( $old_api_key ) && empty( $api_key_sandbox ) && empty( $api_key_live ) ) {
+			// Migrate old API key to sandbox (most common scenario)
+			update_option( 'houzez_netopia_api_key_sandbox', $old_api_key );
+			$api_key_sandbox = $old_api_key;
+			// Delete old option
+			delete_option( 'houzez_netopia_api_key' );
+		}
 
 		include HOUZEZ_NETOPIA_PLUGIN_DIR . 'admin/partials/settings-page.php';
 	}

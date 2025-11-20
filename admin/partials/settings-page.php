@@ -37,11 +37,21 @@
 
 				<tr>
 					<th scope="row">
-						<label for="houzez_netopia_api_key"><?php esc_html_e( 'API Key', 'houzez-netopia' ); ?></label>
+						<label for="houzez_netopia_api_key_sandbox"><?php esc_html_e( 'API Key (Sandbox)', 'houzez-netopia' ); ?></label>
 					</th>
 					<td>
-						<input type="text" id="houzez_netopia_api_key" name="houzez_netopia_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text" required>
-						<p class="description"><?php esc_html_e( 'Your Netopia Payments API Key. You can generate it from your Netopia admin panel.', 'houzez-netopia' ); ?></p>
+						<input type="text" id="houzez_netopia_api_key_sandbox" name="houzez_netopia_api_key_sandbox" value="<?php echo esc_attr( $api_key_sandbox ); ?>" class="regular-text">
+						<p class="description"><?php esc_html_e( 'Your Netopia Payments API Key for Sandbox (testing) environment. You can generate it from your Netopia admin panel.', 'houzez-netopia' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="houzez_netopia_api_key_live"><?php esc_html_e( 'API Key (Live)', 'houzez-netopia' ); ?></label>
+					</th>
+					<td>
+						<input type="text" id="houzez_netopia_api_key_live" name="houzez_netopia_api_key_live" value="<?php echo esc_attr( $api_key_live ); ?>" class="regular-text">
+						<p class="description"><?php esc_html_e( 'Your Netopia Payments API Key for Live (production) environment. You can generate it from your Netopia admin panel.', 'houzez-netopia' ); ?></p>
 					</td>
 				</tr>
 

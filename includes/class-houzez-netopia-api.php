@@ -44,14 +44,24 @@ class Houzez_Netopia_API {
 	 * Initialize the API class.
 	 */
 	public function __construct() {
-		$this->api_key = get_option( 'houzez_netopia_api_key', '' );
-		$this->signature = get_option( 'houzez_netopia_signature', '' );
 		$this->is_sandbox = get_option( 'houzez_netopia_sandbox', '1' ) === '1';
+		$this->signature = get_option( 'houzez_netopia_signature', '' );
 		
+		// Get API key based on sandbox/live mode
 		if ( $this->is_sandbox ) {
+			$this->api_key = get_option( 'houzez_netopia_api_key_sandbox', '' );
 			$this->api_url = 'https://secure.sandbox.netopia-payments.com';
 		} else {
+			$this->api_key = get_option( 'houzez_netopia_api_key_live', '' );
 			$this->api_url = 'https://secure.netopia-payments.com';
+		}
+		
+		// Migration: If new API keys don't exist, try old one
+		if ( empty( $this->api_key ) ) {
+			$old_api_key = get_option( 'houzez_netopia_api_key', '' );
+			if ( ! empty( $old_api_key ) ) {
+				$this->api_key = $old_api_key;
+			}
 		}
 	}
 

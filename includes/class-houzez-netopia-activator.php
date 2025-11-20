@@ -17,7 +17,8 @@ class Houzez_Netopia_Activator {
 		$default_options = array(
 			'houzez_netopia_enabled' => '0',
 			'houzez_netopia_sandbox' => '1',
-			'houzez_netopia_api_key' => '',
+			'houzez_netopia_api_key_sandbox' => '',
+			'houzez_netopia_api_key_live' => '',
 			'houzez_netopia_signature' => '',
 			'houzez_netopia_currency' => 'RON',
 		);
