@@ -288,12 +288,47 @@ class Houzez_Netopia_Payment_Processor {
 		$last_name = get_user_meta( $user_id, 'last_name', true );
 		$phone = get_user_meta( $user_id, 'fave_author_mobile', true );
 		
+		// Try to get first name from multiple sources
 		if ( empty( $first_name ) ) {
 			$first_name = $user->first_name;
 		}
+		if ( empty( $first_name ) ) {
+			// Try to extract from display_name
+			$display_name = $user->display_name;
+			if ( ! empty( $display_name ) ) {
+				$name_parts = explode( ' ', $display_name, 2 );
+				$first_name = $name_parts[0];
+			}
+		}
+		
+		// Try to get last name from multiple sources
 		if ( empty( $last_name ) ) {
 			$last_name = $user->last_name;
 		}
+		if ( empty( $last_name ) ) {
+			// Try to extract from display_name
+			$display_name = $user->display_name;
+			if ( ! empty( $display_name ) ) {
+				$name_parts = explode( ' ', $display_name, 2 );
+				if ( isset( $name_parts[1] ) ) {
+					$last_name = $name_parts[1];
+				}
+			}
+		}
+		
+		// If still empty, use display_name or user_login as fallback
+		if ( empty( $first_name ) && empty( $last_name ) ) {
+			$display_name = $user->display_name;
+			if ( ! empty( $display_name ) && $display_name !== $user->user_login ) {
+				$first_name = $display_name;
+				$last_name = '';
+			} else {
+				// Last resort: use user_login
+				$first_name = $user->user_login;
+				$last_name = '';
+			}
+		}
+		
 		if ( empty( $phone ) ) {
 			$phone = get_user_meta( $user_id, 'fave_author_phone', true );
 		}
