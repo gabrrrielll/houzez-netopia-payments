@@ -286,11 +286,53 @@
 		 */
 		showError: function(message) {
 			// Try to use Houzez notification system if available
-			if (typeof houzez !== 'undefined' && houzez.Core && houzez.Core.util) {
+			if (typeof houzez !== 'undefined' && houzez.Core && houzez.Core.util && typeof houzez.Core.util.showMessage === 'function') {
 				houzez.Core.util.showMessage(message, 'error');
 			} else {
-				alert(message);
+				// Fallback: Create custom error message
+				HouzezNetopia.showCustomError(message);
 			}
+		},
+
+		/**
+		 * Show custom error message.
+		 */
+		showCustomError: function(message) {
+			// Remove any existing error messages
+			$('.netopia-error-message').remove();
+
+			// Create error message element
+			var errorHtml = '<div class="netopia-error-message alert alert-danger" role="alert" style="margin-top: 15px; padding: 12px; border-radius: 4px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;">' +
+				'<strong>Error:</strong> ' + message +
+				'</div>';
+
+			// Insert error message before the payment form or button
+			var $form = $('.netopia-card-form');
+			if ($form.length) {
+				$form.before(errorHtml);
+			} else {
+				// Fallback: insert before Complete Payment button
+				var $button = $('#houzez_complete_order, #houzez_complete_membership');
+				if ($button.length) {
+					$button.before(errorHtml);
+				} else {
+					// Last resort: use alert
+					alert(message);
+					return;
+				}
+			}
+
+			// Scroll to error message
+			$('html, body').animate({
+				scrollTop: $('.netopia-error-message').offset().top - 100
+			}, 500);
+
+			// Auto-hide after 10 seconds
+			setTimeout(function() {
+				$('.netopia-error-message').fadeOut(function() {
+					$(this).remove();
+				});
+			}, 10000);
 		}
 	};
 
