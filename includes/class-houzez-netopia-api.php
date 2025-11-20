@@ -251,7 +251,15 @@ class Houzez_Netopia_API {
 	 * @return bool
 	 */
 	public function is_configured() {
-		return ! empty( $this->api_key ) && ! empty( $this->signature );
+		// Check if API key exists for current mode (sandbox or live)
+		$api_key = $this->is_sandbox ? get_option( 'houzez_netopia_api_key_sandbox', '' ) : get_option( 'houzez_netopia_api_key_live', '' );
+		
+		// Fallback to old API key if new ones don't exist
+		if ( empty( $api_key ) ) {
+			$api_key = get_option( 'houzez_netopia_api_key', '' );
+		}
+		
+		return ! empty( $api_key ) && ! empty( $this->signature );
 	}
 
 	/**
