@@ -147,7 +147,16 @@
 					houzez_register_security2: houzez_netopia.nonce
 				},
 				success: function(response) {
-					if (response.success) {
+					// Reset button state
+					$button.prop('disabled', false).html('Complete Membership');
+					
+					// Check if response is valid
+					if (!response) {
+						HouzezNetopia.showError('Invalid response from server. Please try again.');
+						return;
+					}
+					
+					if (response.success && response.data) {
 						if (response.data.requires_3ds) {
 							// Redirect to 3D Secure
 							HouzezNetopia.handle3DSecure(response.data);
@@ -156,12 +165,31 @@
 							window.location.href = houzez_netopia.success_url;
 						}
 					} else {
-						HouzezNetopia.showError(response.data.message || 'Payment failed. Please try again.');
-						$button.prop('disabled', false).html('Complete Membership');
+						// Handle error response
+						var errorMessage = 'Payment failed. Please try again.';
+						if (response && response.data && response.data.message) {
+							errorMessage = response.data.message;
+						} else if (response && response.message) {
+							errorMessage = response.message;
+						}
+						HouzezNetopia.showError(errorMessage);
 					}
 				},
-				error: function() {
-					HouzezNetopia.showError('An error occurred. Please try again.');
+				error: function(xhr, status, error) {
+					var errorMessage = 'An error occurred. Please try again.';
+					if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+						errorMessage = xhr.responseJSON.data.message;
+					} else if (xhr.responseText) {
+						try {
+							var errorResponse = JSON.parse(xhr.responseText);
+							if (errorResponse.data && errorResponse.data.message) {
+								errorMessage = errorResponse.data.message;
+							}
+						} catch (e) {
+							// Keep default error message
+						}
+					}
+					HouzezNetopia.showError(errorMessage);
 					$button.prop('disabled', false).html('Complete Membership');
 				}
 			});
@@ -208,7 +236,16 @@
 					houzez_register_security2: houzez_netopia.nonce
 				},
 				success: function(response) {
-					if (response.success) {
+					// Reset button state
+					$button.prop('disabled', false).html('Complete Payment');
+					
+					// Check if response is valid
+					if (!response) {
+						HouzezNetopia.showError('Invalid response from server. Please try again.');
+						return;
+					}
+					
+					if (response.success && response.data) {
 						if (response.data.requires_3ds) {
 							// Redirect to 3D Secure
 							HouzezNetopia.handle3DSecure(response.data);
@@ -217,12 +254,31 @@
 							window.location.href = houzez_netopia.success_url;
 						}
 					} else {
-						HouzezNetopia.showError(response.data.message || 'Payment failed. Please try again.');
-						$button.prop('disabled', false).html('Complete Payment');
+						// Handle error response
+						var errorMessage = 'Payment failed. Please try again.';
+						if (response && response.data && response.data.message) {
+							errorMessage = response.data.message;
+						} else if (response && response.message) {
+							errorMessage = response.message;
+						}
+						HouzezNetopia.showError(errorMessage);
 					}
 				},
-				error: function() {
-					HouzezNetopia.showError('An error occurred. Please try again.');
+				error: function(xhr, status, error) {
+					var errorMessage = 'An error occurred. Please try again.';
+					if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+						errorMessage = xhr.responseJSON.data.message;
+					} else if (xhr.responseText) {
+						try {
+							var errorResponse = JSON.parse(xhr.responseText);
+							if (errorResponse.data && errorResponse.data.message) {
+								errorMessage = errorResponse.data.message;
+							}
+						} catch (e) {
+							// Keep default error message
+						}
+					}
+					HouzezNetopia.showError(errorMessage);
 					$button.prop('disabled', false).html('Complete Payment');
 				}
 			});
