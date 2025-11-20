@@ -59,6 +59,7 @@ class Houzez_Netopia_Payment_Processor {
 			'houzez_netopia_return' => '1',
 			'type' => 'package',
 			'package_id' => $package_id,
+			'order_id' => $order_id,
 		), home_url( '/' ) );
 
 		$config = array(
@@ -208,6 +209,7 @@ class Houzez_Netopia_Payment_Processor {
 			'property_id' => $property_id,
 			'is_featured' => $is_featured ? '1' : '0',
 			'is_upgrade' => $is_upgrade ? '1' : '0',
+			'order_id' => $order_id,
 		), home_url( '/' ) );
 
 		$config = array(

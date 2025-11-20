@@ -108,6 +108,14 @@ class Houzez_Netopia_Gateway {
 
 			// Store transaction data temporarily
 			$order_id = $payment_data['order']['orderID'];
+			
+			// Update backUrl in form_data to include order_id
+			if ( isset( $form_data['backUrl'] ) ) {
+				$back_url = $form_data['backUrl'];
+				$back_url = add_query_arg( 'order_id', $order_id, $back_url );
+				$form_data['backUrl'] = $back_url;
+			}
+			
 			$transaction_data = get_transient( 'houzez_netopia_' . $order_id );
 			if ( $transaction_data ) {
 				$transaction_data['auth_token'] = $auth_token;
@@ -193,6 +201,14 @@ class Houzez_Netopia_Gateway {
 
 			// Store transaction data temporarily
 			$order_id = $payment_data['order']['orderID'];
+			
+			// Update backUrl in form_data to include order_id
+			if ( isset( $form_data['backUrl'] ) ) {
+				$back_url = $form_data['backUrl'];
+				$back_url = add_query_arg( 'order_id', $order_id, $back_url );
+				$form_data['backUrl'] = $back_url;
+			}
+			
 			$transaction_data = get_transient( 'houzez_netopia_' . $order_id );
 			if ( $transaction_data ) {
 				$transaction_data['auth_token'] = $auth_token;
@@ -225,15 +241,13 @@ class Houzez_Netopia_Gateway {
 		}
 
 		$type = isset( $_GET['type'] ) ? sanitize_text_field( $_GET['type'] ) : '';
-		$pa_res = isset( $_POST['PaRes'] ) ? sanitize_text_field( $_POST['PaRes'] ) : '';
-
-		if ( empty( $pa_res ) ) {
-			// Check if payment was cancelled
-			if ( isset( $_GET['cancel'] ) ) {
-				wp_redirect( home_url( '/?netopia_payment=cancelled' ) );
-				exit;
-			}
-			return;
+		
+		// PaRes can come from GET or POST (depending on Netopia's redirect method)
+		$pa_res = '';
+		if ( isset( $_POST['PaRes'] ) ) {
+			$pa_res = sanitize_text_field( $_POST['PaRes'] );
+		} elseif ( isset( $_GET['PaRes'] ) ) {
+			$pa_res = sanitize_text_field( $_GET['PaRes'] );
 		}
 
 		// Get order ID from GET or POST
@@ -242,15 +256,52 @@ class Houzez_Netopia_Gateway {
 			$order_id = isset( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : '';
 		}
 
+		// If no order_id, try to get it from property_id or package_id
 		if ( empty( $order_id ) ) {
-			wp_redirect( home_url( '/?netopia_payment=error' ) );
+			if ( $type === 'listing' && isset( $_GET['property_id'] ) ) {
+				$property_id = intval( $_GET['property_id'] );
+				$user_id = get_current_user_id();
+				// Try to reconstruct order_id
+				$transients = get_option( '_transient_timeout_houzez_netopia_', array() );
+				// Search for matching transient
+				global $wpdb;
+				$transient_keys = $wpdb->get_col( 
+					$wpdb->prepare( 
+						"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+						$wpdb->esc_like( '_transient_houzez_netopia_' ) . '%'
+					)
+				);
+				foreach ( $transient_keys as $key ) {
+					$transient_order_id = str_replace( '_transient_houzez_netopia_', '', $key );
+					$transient_data = get_transient( 'houzez_netopia_' . $transient_order_id );
+					if ( $transient_data && isset( $transient_data['property_id'] ) && $transient_data['property_id'] == $property_id ) {
+						$order_id = $transient_order_id;
+						break;
+					}
+				}
+			}
+		}
+
+		if ( empty( $order_id ) ) {
+			wp_redirect( home_url( '/?netopia_payment=error&reason=missing_order_id' ) );
 			exit;
 		}
 
 		// Get transaction data
 		$transaction_data = get_transient( 'houzez_netopia_' . $order_id );
 		if ( ! $transaction_data ) {
-			wp_redirect( home_url( '/?netopia_payment=error' ) );
+			wp_redirect( home_url( '/?netopia_payment=error&reason=transaction_not_found' ) );
+			exit;
+		}
+
+		// If PaRes is empty, check if payment was cancelled
+		if ( empty( $pa_res ) ) {
+			if ( isset( $_GET['cancel'] ) || isset( $_POST['cancel'] ) ) {
+				wp_redirect( home_url( '/?netopia_payment=cancelled' ) );
+				exit;
+			}
+			// If no PaRes and no cancel, might be a redirect issue
+			wp_redirect( home_url( '/?netopia_payment=error&reason=missing_pares' ) );
 			exit;
 		}
 
@@ -277,6 +328,9 @@ class Houzez_Netopia_Gateway {
 				$transaction_data['is_featured'],
 				$transaction_data['is_upgrade']
 			);
+		} else {
+			wp_redirect( home_url( '/?netopia_payment=error&reason=invalid_type' ) );
+			exit;
 		}
 
 		// Redirect to success page
