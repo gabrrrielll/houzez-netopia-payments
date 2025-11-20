@@ -161,8 +161,9 @@
 							// Redirect to 3D Secure
 							HouzezNetopia.handle3DSecure(response.data);
 						} else {
-							// Payment completed
-							window.location.href = houzez_netopia.success_url;
+							// Payment completed - use redirect_url from response or fallback to success_url
+							var redirectUrl = response.data.redirect_url || houzez_netopia.success_url;
+							window.location.href = redirectUrl;
 						}
 					} else {
 						// Handle error response
@@ -250,8 +251,9 @@
 							// Redirect to 3D Secure
 							HouzezNetopia.handle3DSecure(response.data);
 						} else {
-							// Payment completed
-							window.location.href = houzez_netopia.success_url;
+							// Payment completed - use redirect_url from response or fallback to success_url
+							var redirectUrl = response.data.redirect_url || houzez_netopia.success_url;
+							window.location.href = redirectUrl;
 						}
 					} else {
 						// Handle error response

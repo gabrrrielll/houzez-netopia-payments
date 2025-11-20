@@ -136,6 +136,18 @@ class Houzez_Netopia_Gateway {
 		} else {
 			// Payment completed without 3D Secure
 			$this->complete_package_payment( $response, $package_id, $user_id );
+			
+			// Redirect to Thank You page (same as PayPal)
+			$thankyou_url = '';
+			if ( function_exists( 'houzez_get_template_link' ) ) {
+				$thankyou_url = houzez_get_template_link( 'template/template-thankyou.php' );
+			}
+			if ( empty( $thankyou_url ) ) {
+				$thankyou_url = home_url( '/?netopia_payment=success&type=package' );
+			}
+			wp_send_json_success( array(
+				'redirect_url' => $thankyou_url,
+			) );
 		}
 	}
 
@@ -229,6 +241,32 @@ class Houzez_Netopia_Gateway {
 		} else {
 			// Payment completed without 3D Secure
 			$this->complete_listing_payment( $response, $property_id, $user_id, $is_featured, $is_upgrade );
+			
+			// Redirect to property listing or Thank You page
+			$redirect_to_property = get_option( 'houzez_netopia_redirect_to_property', '0' ) === '1';
+			
+			$redirect_url = '';
+			if ( $redirect_to_property && ! empty( $property_id ) ) {
+				// Redirect to property listing
+				$property_url = get_permalink( $property_id );
+				if ( $property_url ) {
+					$redirect_url = $property_url;
+				}
+			}
+			
+			// Default: Redirect to Thank You page (same as PayPal)
+			if ( empty( $redirect_url ) ) {
+				if ( function_exists( 'houzez_get_template_link' ) ) {
+					$redirect_url = houzez_get_template_link( 'template/template-thankyou.php' );
+				}
+				if ( empty( $redirect_url ) ) {
+					$redirect_url = home_url( '/?netopia_payment=success&type=listing&property_id=' . $property_id );
+				}
+			}
+			
+			wp_send_json_success( array(
+				'redirect_url' => $redirect_url,
+			) );
 		}
 	}
 
@@ -352,6 +390,18 @@ class Houzez_Netopia_Gateway {
 		// Complete payment based on type
 		if ( $type === 'package' ) {
 			$this->complete_package_payment( $verify_response, $transaction_data['package_id'], $transaction_data['user_id'] );
+			
+			// Redirect to Thank You page (same as PayPal)
+			$thankyou_url = '';
+			if ( function_exists( 'houzez_get_template_link' ) ) {
+				$thankyou_url = houzez_get_template_link( 'template/template-thankyou.php' );
+			}
+			if ( empty( $thankyou_url ) ) {
+				$thankyou_url = home_url( '/?netopia_payment=success&type=package' );
+			}
+			wp_redirect( $thankyou_url );
+			exit;
+			
 		} elseif ( $type === 'listing' ) {
 			$this->complete_listing_payment(
 				$verify_response,
@@ -360,14 +410,35 @@ class Houzez_Netopia_Gateway {
 				$transaction_data['is_featured'],
 				$transaction_data['is_upgrade']
 			);
+			
+			// Redirect to property listing or Thank You page
+			$property_id = $transaction_data['property_id'];
+			$redirect_to_property = get_option( 'houzez_netopia_redirect_to_property', '0' ) === '1';
+			
+			if ( $redirect_to_property && ! empty( $property_id ) ) {
+				// Redirect to property listing
+				$property_url = get_permalink( $property_id );
+				if ( $property_url ) {
+					wp_redirect( $property_url );
+					exit;
+				}
+			}
+			
+			// Default: Redirect to Thank You page (same as PayPal)
+			$thankyou_url = '';
+			if ( function_exists( 'houzez_get_template_link' ) ) {
+				$thankyou_url = houzez_get_template_link( 'template/template-thankyou.php' );
+			}
+			if ( empty( $thankyou_url ) ) {
+				$thankyou_url = home_url( '/?netopia_payment=success&type=listing&property_id=' . $property_id );
+			}
+			wp_redirect( $thankyou_url );
+			exit;
+			
 		} else {
 			wp_redirect( home_url( '/?netopia_payment=error&reason=invalid_type' ) );
 			exit;
 		}
-
-		// Redirect to success page
-		wp_redirect( home_url( '/?netopia_payment=success' ) );
-		exit;
 	}
 
 	/**
