@@ -55,6 +55,30 @@ register_activation_hook(__FILE__, 'activate_houzez_netopia');
 register_deactivation_hook(__FILE__, 'deactivate_houzez_netopia');
 
 /**
+ * --- Asset Enqueuing ---
+ * Implementarea inline pentru CSS (metodă testată pe server)
+ */
+add_action('wp_head', 'houzez_netopia_inline_frontend_css');
+
+/**
+ * Încarcă CSS-ul inline în header pentru frontend.
+ */
+function houzez_netopia_inline_frontend_css() {
+	// Verificăm dacă suntem pe pagina de plată
+	if (! is_page_template('template-payment.php') && ! isset($_GET['selected_package']) && ! isset($_GET['prop-id'])) {
+		return; // Ieșim dacă nu suntem pe paginile corecte
+	}
+
+	$css_path = HOUZEZ_NETOPIA_PLUGIN_DIR . 'assets/css/frontend.css';
+	
+	if (file_exists($css_path)) {
+		echo '<style type="text/css">' . "\n";
+		echo file_get_contents($css_path);
+		echo '</style>' . "\n";
+	}
+}
+
+/**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
