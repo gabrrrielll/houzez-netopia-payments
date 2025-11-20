@@ -111,26 +111,8 @@ class Houzez_Netopia
             return;
         }
 
-        // CSS-ul este încărcat inline în fișierul principal al pluginului
-        // Nu mai folosim wp_enqueue_style aici
-
-        wp_enqueue_script(
-            $this->plugin_name . '-frontend',
-            HOUZEZ_NETOPIA_PLUGIN_URL . 'assets/js/frontend.js',
-            array( 'jquery' ),
-            $this->version,
-            false
-        );
-
-        wp_localize_script(
-            $this->plugin_name . '-frontend',
-            'houzez_netopia',
-            array(
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('houzez_register_nonce2'),
-                'success_url' => home_url('/?netopia_payment=success'),
-            )
-        );
+        // CSS-ul și JS-ul sunt încărcate inline în fișierul principal al pluginului
+        // Nu mai folosim wp_enqueue_style și wp_enqueue_script aici
     }
 
     /**

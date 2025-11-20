@@ -56,26 +56,60 @@ register_deactivation_hook(__FILE__, 'deactivate_houzez_netopia');
 
 /**
  * --- Asset Enqueuing ---
- * Implementarea inline pentru CSS (metodă testată pe server)
+ * Implementarea inline pentru CSS și JS (metodă testată pe server)
  */
 add_action('wp_head', 'houzez_netopia_inline_frontend_css');
+add_action('wp_footer', 'houzez_netopia_inline_frontend_js');
 
 /**
  * Încarcă CSS-ul inline în header pentru frontend.
  */
-function houzez_netopia_inline_frontend_css() {
-	// Verificăm dacă suntem pe pagina de plată
-	if (! is_page_template('template-payment.php') && ! isset($_GET['selected_package']) && ! isset($_GET['prop-id'])) {
-		return; // Ieșim dacă nu suntem pe paginile corecte
-	}
+function houzez_netopia_inline_frontend_css()
+{
+    // Verificăm dacă suntem pe pagina de plată
+    if (! is_page_template('template-payment.php') && ! isset($_GET['selected_package']) && ! isset($_GET['prop-id'])) {
+        return; // Ieșim dacă nu suntem pe paginile corecte
+    }
 
-	$css_path = HOUZEZ_NETOPIA_PLUGIN_DIR . 'assets/css/frontend.css';
-	
-	if (file_exists($css_path)) {
-		echo '<style type="text/css">' . "\n";
-		echo file_get_contents($css_path);
-		echo '</style>' . "\n";
-	}
+    $css_path = HOUZEZ_NETOPIA_PLUGIN_DIR . 'assets/css/frontend.css';
+
+    if (file_exists($css_path)) {
+        echo '<style type="text/css">' . "\n";
+        echo file_get_contents($css_path);
+        echo '</style>' . "\n";
+    }
+}
+
+/**
+ * Încarcă JavaScript-ul inline în footer pentru frontend.
+ */
+function houzez_netopia_inline_frontend_js()
+{
+    // Verificăm dacă suntem pe pagina de plată
+    if (! is_page_template('template-payment.php') && ! isset($_GET['selected_package']) && ! isset($_GET['prop-id'])) {
+        return; // Ieșim dacă nu suntem pe paginile corecte
+    }
+
+    $js_path = HOUZEZ_NETOPIA_PLUGIN_DIR . 'assets/js/frontend.js';
+
+    if (file_exists($js_path)) {
+        // Asigurăm că jQuery este încărcat
+        wp_enqueue_script('jquery');
+        
+        // Adăugăm variabilele localizate înainte de script
+        echo '<script type="text/javascript">' . "\n";
+        echo 'var houzez_netopia = ' . json_encode(array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('houzez_register_nonce2'),
+            'success_url' => home_url('/?netopia_payment=success'),
+        )) . ';' . "\n";
+        echo '</script>' . "\n";
+        
+        // Adăugăm scriptul principal
+        echo '<script type="text/javascript">' . "\n";
+        echo file_get_contents($js_path);
+        echo '</script>' . "\n";
+    }
 }
 
 /**
