@@ -243,11 +243,27 @@ class Houzez_Netopia_Gateway {
 		$type = isset( $_GET['type'] ) ? sanitize_text_field( $_GET['type'] ) : '';
 		
 		// PaRes can come from GET or POST (depending on Netopia's redirect method)
+		// Check multiple possible parameter names (PaRes, paRes, pa_res, MD)
 		$pa_res = '';
-		if ( isset( $_POST['PaRes'] ) ) {
+		if ( isset( $_POST['PaRes'] ) && ! empty( $_POST['PaRes'] ) ) {
 			$pa_res = sanitize_text_field( $_POST['PaRes'] );
-		} elseif ( isset( $_GET['PaRes'] ) ) {
+		} elseif ( isset( $_POST['paRes'] ) && ! empty( $_POST['paRes'] ) ) {
+			$pa_res = sanitize_text_field( $_POST['paRes'] );
+		} elseif ( isset( $_POST['pa_res'] ) && ! empty( $_POST['pa_res'] ) ) {
+			$pa_res = sanitize_text_field( $_POST['pa_res'] );
+		} elseif ( isset( $_GET['PaRes'] ) && ! empty( $_GET['PaRes'] ) ) {
 			$pa_res = sanitize_text_field( $_GET['PaRes'] );
+		} elseif ( isset( $_GET['paRes'] ) && ! empty( $_GET['paRes'] ) ) {
+			$pa_res = sanitize_text_field( $_GET['paRes'] );
+		} elseif ( isset( $_GET['pa_res'] ) && ! empty( $_GET['pa_res'] ) ) {
+			$pa_res = sanitize_text_field( $_GET['pa_res'] );
+		}
+		
+		// Debug logging (only in sandbox mode)
+		if ( get_option( 'houzez_netopia_sandbox', '1' ) === '1' ) {
+			error_log( 'Netopia Return Debug - GET: ' . print_r( $_GET, true ) );
+			error_log( 'Netopia Return Debug - POST: ' . print_r( $_POST, true ) );
+			error_log( 'Netopia Return Debug - PaRes found: ' . ( ! empty( $pa_res ) ? 'Yes' : 'No' ) );
 		}
 
 		// Get order ID from GET or POST
@@ -294,14 +310,30 @@ class Houzez_Netopia_Gateway {
 			exit;
 		}
 
-		// If PaRes is empty, check if payment was cancelled
+		// If PaRes is empty, check if payment was cancelled or if there's an error
 		if ( empty( $pa_res ) ) {
+			// Check for cancellation
 			if ( isset( $_GET['cancel'] ) || isset( $_POST['cancel'] ) ) {
 				wp_redirect( home_url( '/?netopia_payment=cancelled' ) );
 				exit;
 			}
-			// If no PaRes and no cancel, might be a redirect issue
-			wp_redirect( home_url( '/?netopia_payment=error&reason=missing_pares' ) );
+			
+			// Check for error parameters from Netopia
+			if ( isset( $_GET['error'] ) || isset( $_POST['error'] ) ) {
+				$error_msg = isset( $_GET['error'] ) ? $_GET['error'] : $_POST['error'];
+				wp_redirect( home_url( '/?netopia_payment=error&reason=netopia_error&message=' . urlencode( $error_msg ) ) );
+				exit;
+			}
+			
+			// Check if this is a return from 3D Secure but PaRes is missing
+			// This might happen if user closed the 3D Secure window or there was an error
+			// In sandbox, this is common - log it for debugging
+			if ( get_option( 'houzez_netopia_sandbox', '1' ) === '1' ) {
+				error_log( 'Netopia 3D Secure Return - PaRes missing. This might indicate user cancelled or 3D Secure was interrupted.' );
+			}
+			
+			// If no PaRes and no cancel, might be a redirect issue or user cancelled 3D Secure
+			wp_redirect( home_url( '/?netopia_payment=error&reason=missing_pares&info=3ds_interrupted' ) );
 			exit;
 		}
 
