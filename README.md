@@ -40,6 +40,22 @@ WordPress plugin for integrating Netopia Payments gateway with Houzez theme. Sup
 6. Choose Sandbox or Live mode
 7. Save settings
 
+### Testing in Sandbox Mode
+
+When testing in Sandbox mode, you can use any valid card number format. Common test card numbers:
+- **Visa:** 4111 1111 1111 1111
+- **Mastercard:** 5555 5555 5555 4444
+- **Any future date** for expiration (e.g., 12/2028)
+- **Any 3-digit CVV** (e.g., 123)
+
+**Important:** Make sure you are using Sandbox API credentials when testing. The API Key and Signature from your Sandbox account are different from Live account credentials.
+
+If you see "Authorization required" error, check:
+1. API Key is correct and matches Sandbox/Live mode
+2. Signature ID (POS Signature) is correct
+3. You are using Sandbox credentials when Sandbox mode is enabled
+4. You are using Live credentials when Live mode is enabled
+
 ## Usage
 
 ### For Membership Packages

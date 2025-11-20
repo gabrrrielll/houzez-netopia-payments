@@ -78,6 +78,11 @@ class Houzez_Netopia_Gateway {
 			wp_send_json_error( array( 'message' => __( 'Please fill in all card details.', 'houzez-netopia' ) ) );
 		}
 
+		// Check if API is configured
+		if ( ! $this->api->is_configured() ) {
+			wp_send_json_error( array( 'message' => __( 'Netopia Payments is not configured. Please check API Key and Signature in settings.', 'houzez-netopia' ) ) );
+		}
+
 		// Prepare payment data
 		$payment_data = $this->processor->prepare_package_payment( $package_id, $user_id, $card_data );
 
@@ -85,7 +90,12 @@ class Houzez_Netopia_Gateway {
 		$response = $this->api->start_payment( $payment_data );
 
 		if ( is_wp_error( $response ) ) {
-			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
+			$error_message = $response->get_error_message();
+			// Check if it's an authorization error
+			if ( strpos( $error_message, 'Authorization required' ) !== false ) {
+				$error_message = __( 'Authorization failed. Please check your API Key and Signature in Netopia Payments settings. Make sure you are using the correct credentials for Sandbox or Live mode.', 'houzez-netopia' );
+			}
+			wp_send_json_error( array( 'message' => $error_message ) );
 		}
 
 		// Check if 3D Secure is required
@@ -153,6 +163,11 @@ class Houzez_Netopia_Gateway {
 			wp_send_json_error( array( 'message' => __( 'Please fill in all card details.', 'houzez-netopia' ) ) );
 		}
 
+		// Check if API is configured
+		if ( ! $this->api->is_configured() ) {
+			wp_send_json_error( array( 'message' => __( 'Netopia Payments is not configured. Please check API Key and Signature in settings.', 'houzez-netopia' ) ) );
+		}
+
 		// Prepare payment data
 		$payment_data = $this->processor->prepare_listing_payment( $property_id, $user_id, $is_featured, $is_upgrade, $card_data );
 
@@ -160,7 +175,12 @@ class Houzez_Netopia_Gateway {
 		$response = $this->api->start_payment( $payment_data );
 
 		if ( is_wp_error( $response ) ) {
-			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
+			$error_message = $response->get_error_message();
+			// Check if it's an authorization error
+			if ( strpos( $error_message, 'Authorization required' ) !== false ) {
+				$error_message = __( 'Authorization failed. Please check your API Key and Signature in Netopia Payments settings. Make sure you are using the correct credentials for Sandbox or Live mode.', 'houzez-netopia' );
+			}
+			wp_send_json_error( array( 'message' => $error_message ) );
 		}
 
 		// Check if 3D Secure is required
