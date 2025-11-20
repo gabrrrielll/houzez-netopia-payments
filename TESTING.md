@@ -74,6 +74,24 @@
    - Dacă totul este configurat corect, plata va fi procesată
    - Dacă este necesară autentificare 3D Secure, vei fi redirecționat către pagina băncii
 
+### Autentificare 3D Secure (dacă este necesară)
+
+Când folosești un card care necesită 3D Secure, vei fi redirecționat către o pagină de autentificare Netopia.
+
+**Pentru modul Sandbox/Demo:**
+- Vei vedea o pagină cu textul "DEMO page" și "Customer Strong Authentication"
+- În câmpul "Enter Secret CODE" poți introduce **orice cod** (ex: `1234`, `0000`, `test`)
+- Apasă butonul **"Accept Payment"**
+- Este un mediu de test, deci nu există un cod real de introdus
+
+**Carduri de test care necesită 3D Secure:**
+- **Număr card**: `9900004810225098`
+- **CVV**: `111`
+- **Data expirării**: Orice dată viitoare (ex: 12/2028)
+- **Secret CODE pe pagina 3D Secure**: Orice cod (ex: `1234`)
+
+**Notă:** În modul Sandbox, pagina 3D Secure este doar o simulare. Poți introduce orice cod pentru a continua testarea.
+
 ### Carduri de test pentru Sandbox
 
 Când testezi în modul **Sandbox**, poți folosi orice număr de card valid:
